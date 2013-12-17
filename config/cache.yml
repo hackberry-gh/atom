@@ -1,0 +1,20 @@
+development:
+  compress:     true
+  threadsafe:   true
+  namespace:    pubs:development
+  servers:      localhost:11211
+  async:        true
+test:
+  compress:     true
+  threadsafe:   true
+  namespace:    pubs:test
+  servers:      localhost:11211
+  async:        true
+production:
+  compress:     true
+  threadsafe:   true
+  namespace:    pubs
+  servers:      <%= ENV['MEMCACHIER_SERVERS'] %>
+  password:     <%= ENV['MEMCACHIER_PASSWORD'] %>
+  username:     <%= ENV['MEMCACHIER_USERNAME'] %>
+  async:        true
