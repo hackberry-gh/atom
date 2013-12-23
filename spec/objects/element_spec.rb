@@ -14,7 +14,13 @@ describe :element do
   it "determines atom's behaviour" do
     Element.create!(fixture(:elements,:user))
     -> {User.create!}.must_raise ActiveRecord::RecordInvalid
-    user = User.create(fixture(:atoms,:user))
+  end
+  
+  it "counts atoms" do
+    Element.create!(fixture(:elements,:user))
+    user1 = User.create!(fixture(:atoms,:user))    
+    user2 = User.create!(fixture(:atoms,:user2))        
+    User.count.must_equal 2
   end
   
 end

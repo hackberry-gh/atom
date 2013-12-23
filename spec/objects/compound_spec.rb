@@ -30,6 +30,8 @@ describe :compound do
     hans.name.must_equal "Hans"
     hans.class.must_equal Member::De
     
+    Member.unregister
+    
   end
   
   it "unifies atom classes through localised element spesification" do
@@ -46,7 +48,7 @@ describe :compound do
     user = User.create(email: "test2@test.com")
     user.persisted?.must_equal false   
      
-    Object.send :remove_const, :User
-    
+    User.unregister
   end
+  
 end

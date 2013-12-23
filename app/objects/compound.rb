@@ -21,9 +21,10 @@ class Compound
     
     def register_element element
       element.send :pop!
+      atom_class = element.class_name
       Object.module_eval "class #{element.class_name} < Compound; end"      
-      self.atom_class = element.class_name.safe_constantize
       element.class_eval do
+        alias_method :org_class_name, :class_name
         def class_name locale = I18n.locale
           "#{self.name}::#{locale.to_s.classify}"
         end
@@ -33,7 +34,14 @@ class Compound
           element.send :gen!
         end
       end
-      self.register_locales
+      atom_class.constantize.register_locales
+    end
+    
+    def unregister
+      atom_class_name = self.atom_class.name
+      self.members.each{|locale,klass| self.atom_class.send :remove_const, locale_class_name(locale)}
+      self.members = {}
+      Object.send :remove_const, atom_class_name
     end
     
     def register_locales 
@@ -47,11 +55,7 @@ class Compound
     end
     
     def atom_class
-      @@atom_class ||= self.name.safe_constantize
-    end
-    
-    def atom_class=atom_class
-      @@atom_class=atom_class
+      self.name.safe_constantize
     end
 
     def locale_class_name locale = I18n.locale

@@ -6,6 +6,11 @@ user:
   email: "user@test.com"    
   first_name: "name"
   last_name: "surname"
+
+user2:
+  email: "user@test.com"    
+  first_name: "name"
+  last_name: "surname"  
   
 article:
   i18n:
