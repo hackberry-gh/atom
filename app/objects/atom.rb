@@ -7,12 +7,11 @@
 # ==========
 # - data, JSON
 
-require 'pubs/i18n'
-
 class Atom < ActiveRecord::Base
+  
+  self.abstract_class = true
+  
   self.table_name = "atoms"
-
-  include Pubs::I18n
 
   belongs_to :element, counter_cache: true
 

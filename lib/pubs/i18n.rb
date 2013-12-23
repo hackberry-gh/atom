@@ -7,13 +7,20 @@ module Pubs
 
     module ClassMethods
       
-      def overrides
-        @@overrides ||= []
+      def localized_attributes
+        @@localized_attributes ||= {}
       end
       
-      def localized_attributes
-        @@localized_attributes ||= [:attributes, :validations, :callbacks, :translations]
-      end
+      def localized_attributes=localized_attributes
+        @@localized_attributes = localized_attributes
+      end     
+      
+      def localize(store_attribute, *keys)
+        keys = keys.flatten
+        self.localized_attributes[store_attribute] ||= []
+        self.localized_attributes[store_attribute] |= keys
+        store_accessor store_attribute, :i18n
+      end         
 
       def store_accessor(store_attribute, *keys)
 
@@ -34,8 +41,10 @@ module Pubs
           end
 
           def read_store_attribute(store_attribute, key)
-            return super(store_attribute, key) unless self.class.localized_attributes.include?(key)
+            return super(store_attribute, key) unless self.class.localized_attributes[store_attribute].include?(key)
+
             attribute = initialize_store_attribute(store_attribute)
+            
             # try fetch localised value and fallback to default or atom default
             attribute[:i18n].try(:[],::I18n.locale).try(:[],key) ||
             attribute[:i18n].try(:[],::I18n.default_locale).try(:[],key) ||
@@ -43,7 +52,8 @@ module Pubs
           end
 
           def write_store_attribute(store_attribute, key, value)
-            return super(store_attribute, key, value) unless self.class.localized_attributes.include?(key)
+            return super(store_attribute, key, value) unless self.class.localized_attributes[store_attribute].include?(key)
+            
             attribute = initialize_store_attribute(store_attribute)
 
             # if localised is not set or will change
@@ -52,8 +62,8 @@ module Pubs
               # set default locale if supplied
               attribute[key] = value if ::I18n.locale == ::I18n.default_locale
               # set localised content
-              attribute[:i18n] ||= {}
-              attribute[:i18n][::I18n.locale] ||= {}
+              attribute[:i18n] ||= HashWithIndifferentAccess.new
+              attribute[:i18n][::I18n.locale] ||= HashWithIndifferentAccess.new
               attribute[:i18n][::I18n.locale][key] = value
             end
           end
@@ -64,48 +74,6 @@ module Pubs
         self.stored_attributes[store_attribute] |= keys
       end
       
-      def method_added(name)
-        if [:class_name,:gen!].include?(name) && !self.overrides.include?(name)
-          self.overrides << name
-          alias_method :"default_#{name}", name
-          alias_method name, :"localised_#{name}"          
-        end
-      end
-      
-    end
-    
-    included do
-      if self.name == "Element"
-        store_accessor :meta, :name, :group, :primary_key,
-        :attributes, :validations, :callbacks, :translations, :localize, :i18n
-      end
-    end
-    
-    def compound_code
-      <<-CODE
-        class #{self.name} < Compound
-        end
-      CODE
-    end
-    
-    
-    def localised_class_name
-      self.localize.nil? ? default_class_name : "#{self.name}#{::I18n.locale.to_s.classify}"
-    end
-    
-    
-    def localised_gen!
-      if self.localize.nil?
-        default_gen!
-      else
-        Object.module_eval compound_code
-        ([::I18n.default_locale] + self.i18n.keys).each do |locale|
-          ::I18n.with_locale(locale.to_sym) do
-            default_gen!
-          end
-        end
-        self.name.constantize.register_locales
-      end
     end
 
   end

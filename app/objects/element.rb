@@ -19,6 +19,7 @@
 # - settings, JSON, *optional, {key: 'value'}, Customisable options
 # - translations, JSON
 # - i18n, JSON
+# - settings, JSON
 # -- public_attributes map of json representation
 # -- csv_attributes to download desired columns as csv
 # -- stub_attributes to skip saving data in db
@@ -45,7 +46,9 @@ class Element < ActiveRecord::Base
   include Pubs::I18n
 
   store_accessor :meta, :name, :group, :primary_key,
-  :attributes, :validations, :callbacks, :translations
+  :attributes, :validations, :callbacks, :translations, :settings
+  
+  localize :meta, :attributes, :validations, :callbacks, :translations, :settings
 
   STUB = "Stub".freeze
 
@@ -63,7 +66,7 @@ class Element < ActiveRecord::Base
   %w(csv_attributes public_attributes).each { |attr_name|
     class_eval <<-CODE
     def #{attr_name}
-      (settings.try(:[],:#{attr_name}).keys.map(&:to_sym) || persistent_attributes)
+      (attr_settings = settings.try(:[],:#{attr_name}) ? attr_settings.keys.map(&:to_sym) : persistent_attributes)
     end
     CODE
   }
@@ -77,7 +80,7 @@ class Element < ActiveRecord::Base
   end
 
   def class_defined?
-    Object.const_defined?(self.class_name)
+    Object.const_defined?(self.class_name.demodulize)
   end
   
   def class_name
@@ -100,9 +103,11 @@ class Element < ActiveRecord::Base
       # load ActiveRecord translations
       load_translations
       # Freshly baked above!
-      klass = self.class_name.constantize
+      klass = self.class_name.safe_constantize
       # data attributes
       klass.send :store_accessor, :data, *self.persistent_attributes
+      # localize data attributes
+      klass.send :localize, :data, *self.persistent_attributes      
       # stubs
       klass.send :attr_accessor, *self.stub_attributes
 
@@ -119,7 +124,7 @@ class Element < ActiveRecord::Base
   end
 
   def pop!
-    if Object.const_defined? self.class_name
+    if Object.const_defined? self.class_name.demodulize
       Object.send :remove_const, self.class_name
     end
   end
@@ -141,6 +146,7 @@ class Element < ActiveRecord::Base
   def atom_code
     <<-CODE
       class #{class_name} < Atom
+        include Pubs::I18n
         default_scope -> { where(element_id: '#{self.id}') }
       end
     CODE

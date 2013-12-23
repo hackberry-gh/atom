@@ -9,6 +9,13 @@ user:
   validations:
     validates_presence_of: ':email'
 
+article:
+  name: Article
+  group: articles
+  primary_key: title
+  attributes:
+    title: String
+
 multi_user:
   name: User
   group: users
@@ -30,12 +37,8 @@ multi_user:
         person:
           email:
             blank: "Please fill in your %{attribute}"
-  localize: true          
   i18n:
     de:
-      name: User
-      group: users
-      primary_key: email
       attributes:
         email: String
         first_name: String

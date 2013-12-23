@@ -11,6 +11,10 @@ describe :element do
     -> { Element.create! }.must_raise ActiveRecord::RecordInvalid
   end
   
-  
+  it "determines atom's behaviour" do
+    Element.create!(fixture(:elements,:user))
+    -> {User.create!}.must_raise ActiveRecord::RecordInvalid
+    user = User.create(fixture(:atoms,:user))
+  end
   
 end

@@ -6,3 +6,10 @@ user:
   email: "user@test.com"    
   first_name: "name"
   last_name: "surname"
+  
+article:
+  i18n:
+    en:
+      title: "Article"    
+    de:
+      title: "Artikel"    

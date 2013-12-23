@@ -8,6 +8,7 @@ DatabaseCleaner.strategy = :deletion
 class MiniTest::Spec
 
   before :each do
+    I18n.locale = I18n.default_locale
     DatabaseCleaner.start
   end
 
