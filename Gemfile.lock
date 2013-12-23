@@ -21,6 +21,7 @@ GEM
     async-rack (0.5.1)
       rack (~> 1.1)
     atomic (1.1.14)
+    awesome_print (1.2.0)
     builder (3.1.4)
     cookiejar (0.3.0)
     dalli (2.6.4)
@@ -80,6 +81,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord (~> 4.0.2)
+  awesome_print
   dalli (~> 2.6.4)
   database_cleaner
   em-http-request

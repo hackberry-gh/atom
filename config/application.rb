@@ -11,3 +11,4 @@ Time.zone = ENV['TIME_ZONE'] || "London"
 
 require 'app/objects/element'
 require 'app/objects/atom'
+require 'app/objects/compound'

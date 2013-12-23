@@ -45,7 +45,7 @@ class Element < ActiveRecord::Base
   include Pubs::I18n
 
   store_accessor :meta, :name, :group, :primary_key,
-  :attributes, :validations, :callbacks, :translations, :i18n
+  :attributes, :validations, :callbacks, :translations
 
   STUB = "Stub".freeze
 
@@ -77,7 +77,11 @@ class Element < ActiveRecord::Base
   end
 
   def class_defined?
-    Object.const_defined?(self.name)
+    Object.const_defined?(self.class_name)
+  end
+  
+  def class_name
+    self.name
   end
 
   private
@@ -92,23 +96,19 @@ class Element < ActiveRecord::Base
       pop!
 
       # Generate and define new Element Class
-      Object.module_eval <<-CODE
-        class #{self.name} < Atom
-          default_scope -> { where(element_id: '#{self.id}') }
-        end
-      CODE
+      Object.module_eval atom_code
       # load ActiveRecord translations
       load_translations
       # Freshly baked above!
-      klass = self.name.constantize
+      klass = self.class_name.constantize
       # data attributes
       klass.send :store_accessor, :data, *self.persistent_attributes
       # stubs
       klass.send :attr_accessor, *self.stub_attributes
 
-      %w(validations callbacks).each { |prop|
+      [:validations,:callbacks].each { |prop|
 
-        next if (hash=self[prop]).nil?
+        next if (hash=self.send(prop)).nil?
 
         # lazy conversion of hash into ruby code
         klass.class_eval hash.map{ |k,v| k.to_s + v.to_s }.join("\n")
@@ -119,8 +119,8 @@ class Element < ActiveRecord::Base
   end
 
   def pop!
-    if Object.const_defined? self.name
-      Object.send :remove_const, self.name
+    if Object.const_defined? self.class_name
+      Object.send :remove_const, self.class_name
     end
   end
 
@@ -136,6 +136,14 @@ class Element < ActiveRecord::Base
     self.translations.each { |k,v|
       I18n.backend.store_translations(I18n.locale, {k => v})
     } if self.translations.present?
+  end
+  
+  def atom_code
+    <<-CODE
+      class #{class_name} < Atom
+        default_scope -> { where(element_id: '#{self.id}') }
+      end
+    CODE
   end
 
 end

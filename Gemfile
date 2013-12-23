@@ -16,4 +16,5 @@ group :test do
   gem 'em-http-request'
   gem 'em-websocket-client'
   gem 'timecop'
+  gem 'awesome_print'
 end

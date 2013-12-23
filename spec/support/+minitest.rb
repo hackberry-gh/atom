@@ -1,6 +1,7 @@
 require "database_cleaner"
 require "minitest/pride"
 require "minitest/autorun"
+require 'awesome_print'
 
 DatabaseCleaner.strategy = :deletion
 
