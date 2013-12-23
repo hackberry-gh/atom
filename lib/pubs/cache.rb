@@ -20,9 +20,6 @@ module Pubs
 
     end
 
-    # def cache
-#       Cache::Client.instance
-#     end
     include ClassMethods
 
     class Client

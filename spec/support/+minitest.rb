@@ -16,7 +16,7 @@ class MiniTest::Spec
   end
 
   def fixture file, object
-    (@fixtures ||= YAML::load_file("spec/fixtures/#{file}.yml"))[object]
+    (YAML::load_file("spec/fixtures/#{file}.yml")).symbolize_keys![object]
   end
 
 end

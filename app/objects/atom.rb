@@ -7,19 +7,23 @@
 # ==========
 # - data, JSON
 
+require 'pubs/i18n'
+
 class Atom < ActiveRecord::Base
   self.table_name = "atoms"
-  
+
+  include Pubs::I18n
+
   belongs_to :element, counter_cache: true
-  
+
   def to_csv csv_attributes = element.csv_attributes
     csv_attributes.map{ |key|
       key.split(".").inject(self.data){ |data,key| data.try(:[],key) }
     }.to_csv
   end
-  
+
   def as_json(options = {})
     super({except: [:data], methods: element.public_attributes}.update(options))
   end
-  
+
 end
