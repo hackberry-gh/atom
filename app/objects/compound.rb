@@ -28,6 +28,14 @@ class Compound
         def class_name locale = I18n.locale
           "#{self.name}::#{locale.to_s.classify}"
         end
+        def class_defined?
+          Object.const_defined?(self.class_name.demodulize)
+        end
+        def pop!
+          if Object.const_defined? self.class_name.demodulize
+            Object.send :remove_const, self.class_name
+          end
+        end
       end
       I18n.available_locales.each do |locale|
         I18n.with_locale(locale) do
@@ -69,6 +77,7 @@ class Compound
     def class_name locale = I18n.locale
       "#{atom_class}::#{locale_class_name(locale)}"
     end
+    
     
     def members
       @@members ||= {}

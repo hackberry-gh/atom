@@ -7,7 +7,11 @@
 # ==========
 # - data, JSON
 
+require 'pubs/plv8'
+
 class Atom < ActiveRecord::Base
+  
+  include Pubs::PLV8
   
   self.abstract_class = true
   

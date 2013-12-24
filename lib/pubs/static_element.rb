@@ -32,9 +32,5 @@ module Pubs
       self.element_id ||= self.element.id
     end
     
-    def atom_code
-      self.class.atom_code
-    end
-    
   end
 end

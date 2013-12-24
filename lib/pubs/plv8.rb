@@ -32,8 +32,8 @@ module Pubs
     
     module ClassMethods
       
-      def json_where key, value, plv8_method = PLV8_METHODS[0]
-        json_query :where, plv8_method, key, EQ, value
+      def json_where key, value, operator = EQ, plv8_method = PLV8_METHODS[0]
+        json_query :where, plv8_method, key, operator, value
       end
       
       def json_find_by key, value, plv8_method = PLV8_METHODS[0]

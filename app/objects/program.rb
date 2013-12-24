@@ -5,12 +5,14 @@ class Program < Atom
  
   store_accessor :data, :name, :slug, :code, :result
   validates_presence_of :name, :name
-  
-  before_save :set_slug
  
-  def run!
-    self.result = eval(self.code)
+  def execute
+    run(self.code)
   end  
+  
+  def run code
+    self.result = eval(code)
+  end
   
   private
   

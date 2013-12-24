@@ -82,7 +82,7 @@ class Element < ActiveRecord::Base
   end
 
   def class_defined?
-    Object.const_defined?(self.class_name.demodulize)
+    Object.const_defined?(self.class_name)
   end
   
   def class_name
@@ -95,20 +95,23 @@ class Element < ActiveRecord::Base
     if self.redefine || !class_defined?
 
       self.redefine = false
+      
+      # skip class registration if atom is staticly typed
+      if self.attributes[:static].nil?
+        # Hmm, removing and readding a constant on the fly
+        # not sure but a bit scary
+        pop!
 
-      # Hmm, removing and readding a constant on the fly
-      # not sure but a bit scary
-      pop!
-
-      # Generate and define new Element Class
-      Object.module_eval atom_code
+        # Generate and define new Element Class
+        Object.module_eval atom_code
+      end
       
       define!
     end
   end
 
   def pop!
-    if Object.const_defined? self.class_name.demodulize
+    if Object.const_defined? self.class_name
       Object.send :remove_const, self.class_name
     end
   end
@@ -120,8 +123,8 @@ class Element < ActiveRecord::Base
     klass = self.class_name.safe_constantize
     # data attributes
     klass.send :store_accessor, :data, *self.persistent_attributes
-    # localize data attributes
-    klass.send :localize, :data, *self.persistent_attributes      
+    # localize data attributes if i18n added
+    klass.try :localize, :data, *self.persistent_attributes      
     # stubs
     klass.send :attr_accessor, *self.stub_attributes
 
@@ -154,7 +157,6 @@ class Element < ActiveRecord::Base
     <<-CODE
       class #{class_name} < Atom
         include Pubs::I18n
-        include Pubs::PLV8
         default_scope -> { where(element_id: '#{self.id}') }
         validate :uniq_primary_key, if: "pkey_name.present?"
         def pkey_name

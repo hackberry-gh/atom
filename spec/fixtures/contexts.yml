@@ -1,0 +1,35 @@
+truman:
+  name: "Truman"
+  hooks:
+    before_test: |
+      puts "Before Test"
+    after_test: 
+      puts "After Test"
+    before_execute: |
+      puts "Before Execute"
+    after_execute: 
+      puts "After Execute"      
+  conditions: |
+    self.name == "Truman"
+  code: |
+    result = "Truman executed"
+    puts result
+    result
+
+failing:
+  name: "Failing"
+  hooks:
+    before_test: |
+      puts "Before Test"
+    after_test: 
+      puts "After Test"
+    before_execute: |
+      puts "Never Shown Before"
+    after_execute: 
+      puts "Never Shown After"      
+  conditions: |
+    self.name == "Truman"
+  code: |
+    result = "Truman executed"
+    puts result
+    result    
