@@ -1,7 +1,4 @@
 class Context < Program
-end
-
-class Context < Program
   
   store_accessor :data, :run_at, :conditions, :hooks
   
@@ -34,5 +31,6 @@ class Context < Program
       super
     end
   end
+  
   
 end
