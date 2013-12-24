@@ -1,0 +1,6 @@
+puts:
+  name: "Hello World"
+  code: |
+    hello = "Hello World"
+    puts hello
+    hello

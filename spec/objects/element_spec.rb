@@ -23,4 +23,11 @@ describe :element do
     User.count.must_equal 2
   end
   
+  it "validate primary key" do
+    Element.create!(fixture(:elements,:user))
+    user1 = User.create!(fixture(:atoms,:user))    
+    -> { User.create!(fixture(:atoms,:user)) }.must_raise ActiveRecord::RecordInvalid
+    
+  end
+  
 end

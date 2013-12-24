@@ -40,10 +40,12 @@
 #   }
 # })
 require 'pubs/i18n'
+require 'pubs/plv8'
 
 class Element < ActiveRecord::Base
 
   include Pubs::I18n
+  include Pubs::PLV8
 
   store_accessor :meta, :name, :group, :primary_key,
   :attributes, :validations, :callbacks, :translations, :settings
@@ -89,7 +91,7 @@ class Element < ActiveRecord::Base
 
   private
 
-  def gen!
+  def gen! 
     if self.redefine || !class_defined?
 
       self.redefine = false
@@ -100,26 +102,8 @@ class Element < ActiveRecord::Base
 
       # Generate and define new Element Class
       Object.module_eval atom_code
-      # load ActiveRecord translations
-      load_translations
-      # Freshly baked above!
-      klass = self.class_name.safe_constantize
-      # data attributes
-      klass.send :store_accessor, :data, *self.persistent_attributes
-      # localize data attributes
-      klass.send :localize, :data, *self.persistent_attributes      
-      # stubs
-      klass.send :attr_accessor, *self.stub_attributes
-
-      [:validations,:callbacks].each { |prop|
-
-        next if (hash=self.send(prop)).nil?
-
-        # lazy conversion of hash into ruby code
-        klass.class_eval hash.map{ |k,v| k.to_s + v.to_s }.join("\n")
-      }
-
-      klass
+      
+      define!
     end
   end
 
@@ -127,6 +111,29 @@ class Element < ActiveRecord::Base
     if Object.const_defined? self.class_name.demodulize
       Object.send :remove_const, self.class_name
     end
+  end
+
+  def define!
+    # load ActiveRecord translations
+    load_translations
+    # Freshly baked above!
+    klass = self.class_name.safe_constantize
+    # data attributes
+    klass.send :store_accessor, :data, *self.persistent_attributes
+    # localize data attributes
+    klass.send :localize, :data, *self.persistent_attributes      
+    # stubs
+    klass.send :attr_accessor, *self.stub_attributes
+
+    [:validations,:callbacks].each { |prop|
+
+      next if (hash=self.send(prop)).nil?
+
+      # lazy conversion of hash into ruby code
+      klass.class_eval hash.map{ |k,v| k.to_s + v.to_s }.join("\n")
+    }
+    
+    klass
   end
 
   def check_naming
@@ -147,7 +154,19 @@ class Element < ActiveRecord::Base
     <<-CODE
       class #{class_name} < Atom
         include Pubs::I18n
+        include Pubs::PLV8
         default_scope -> { where(element_id: '#{self.id}') }
+        validate :uniq_primary_key, if: "pkey_name.present?"
+        def pkey_name
+          self.element.try(:primary_key).try(:to_sym)
+        end
+        def pkey
+          self.send(self.pkey_name) if self.pkey_name
+        end
+        private
+        def uniq_primary_key
+          errors.add(self.pkey_name, :taken) unless self.class.json_find_by(self.pkey_name, self.pkey).nil?
+        end
       end
     CODE
   end

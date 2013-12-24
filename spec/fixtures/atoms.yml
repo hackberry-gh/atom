@@ -8,7 +8,7 @@ user:
   last_name: "surname"
 
 user2:
-  email: "user@test.com"    
+  email: "user2@test.com"    
   first_name: "name"
   last_name: "surname"  
   
