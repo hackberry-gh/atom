@@ -51,6 +51,14 @@ module Pubs
       end
 
     end
+    
+    def json_increment! key, amount = 1
+      json_update_column key, amount, PLV8_METHODS[6]
+    end
+    
+    def json_decrement! key, amount = 1
+      json_update_column key, amount, PLV8_METHODS[7]
+    end    
 
     def json_setn key, number
       json_update_column key,number,PLV8_METHODS[8]

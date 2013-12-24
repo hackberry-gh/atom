@@ -9,13 +9,23 @@ user:
   validations:
     validates_presence_of: ':email'
 
+counter:
+  name: Counter
+  group: counters
+  attributes:
+    src: String
+    count: Integer
+
 article:
   name: Article
   group: articles
   primary_key: title
   attributes:
     title: String
-
+  settings:
+    i18n_attributes: 
+      - title
+    
 multi_user:
   name: User
   group: users

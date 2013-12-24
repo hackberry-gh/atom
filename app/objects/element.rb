@@ -20,6 +20,7 @@
 # - translations, JSON
 # - i18n, JSON
 # - settings, JSON
+# -- i18n_attributes, keys for translatable attributes
 # -- public_attributes map of json representation
 # -- csv_attributes to download desired columns as csv
 # -- stub_attributes to skip saving data in db
@@ -72,6 +73,10 @@ class Element < ActiveRecord::Base
     end
     CODE
   }
+  
+  def i18n_attributes
+    settings.try(:[],:i18n_attributes).try(:map,&:to_sym) || []
+  end
 
   def persistent_attributes
     attributes.select{|name,type| type != STUB}.keys.map(&:to_sym)
@@ -124,7 +129,7 @@ class Element < ActiveRecord::Base
     # data attributes
     klass.send :store_accessor, :data, *self.persistent_attributes
     # localize data attributes if i18n added
-    klass.try :localize, :data, *self.persistent_attributes      
+    klass.try :localize, :data, *self.i18n_attributes      
     # stubs
     klass.send :attr_accessor, *self.stub_attributes
 

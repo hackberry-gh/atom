@@ -15,16 +15,18 @@ class Program < Atom
     self.json_setn(:finished_at, Time.now.to_i)
   end
 
-  def execute
+  def execute binding = nil
     run_callbacks :execute do
-      run(self.code)
+      run(self.code, binding)
     end
   end
 
-  def run code
+  def run code, binding = nil
     begin
-      result = eval(code)
-      self.json_set(:result, result)
+      if result = eval(code, binding)
+        self.json_set(:result, result)
+      end
+      result  
     rescue Exception => e
       self.json_set(:error, e.backtrace.join("\n"))
       return false
