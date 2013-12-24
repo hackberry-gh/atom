@@ -63,6 +63,7 @@ module Pubs
         super(*args.map{ |condition| json_condition(condition) })
       end
 
+
       def json_condition condition
 
         key = condition.keys.first
@@ -119,10 +120,20 @@ module Pubs
     end
 
     def json_update params, sync = true
-
       result = self.class.json_update params, json_conditions, sync
       process_result result
+    end
 
+    def json_push key, item
+      update = "json_push(#{self.class.store},#{self.class.sanitize(key)},#{self.class.sanitize(item.to_json)}) "
+      result = self.class.json_func update, json_conditions
+      process_result result
+    end
+
+    def json_pull key, item
+      update = "json_pull(#{self.class.store},#{self.class.sanitize(key)},#{self.class.sanitize(item.to_json)}) "
+      result = self.class.json_func update, json_conditions
+      process_result result
     end
 
     def json_increment! key, amount = 1

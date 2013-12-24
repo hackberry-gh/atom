@@ -70,6 +70,28 @@ class CreateProcedures < ActiveRecord::Migration
   $$ LANGUAGE plv8 IMMUTABLE STRICT;"
   end
 
+  # SELECT id, (json_array(data,'object.list') FROM things WHERE 10 = ANY/All (json_array(data,'object.list'))
+  def json_string_array
+  "CREATE or REPLACE FUNCTION
+  json_string_array(data json, key text) RETURNS TEXT[] AS $$
+
+    var ret = data;
+    var keys = key.split('.')
+    var len = keys.length;
+
+    for (var i=0; i<len; ++i) {
+      if (ret != undefined) ret = ret[keys[i]];
+    }
+
+    if (! (ret instanceof Array)) {
+      ret = [ret];
+    }
+
+    return ret;
+
+  $$ LANGUAGE plv8 IMMUTABLE STRICT;"
+  end
+
   # SELECT id, (json_int_array(data,'object.list') FROM things WHERE 10 = ANY/All (json_int_array(data,'object.list'))
   def json_int_array
   "CREATE or REPLACE FUNCTION

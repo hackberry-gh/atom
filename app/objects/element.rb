@@ -141,6 +141,8 @@ class Element < ActiveRecord::Base
       # lazy conversion of hash into ruby code
       klass.class_eval hash.map{ |k,v| k.to_s + v.to_s }.join("\n")
     }
+    
+    #create_index_for_pkey self.primary_key
 
     klass
   end
@@ -158,6 +160,11 @@ class Element < ActiveRecord::Base
       I18n.backend.store_translations(I18n.locale, {k => v})
     } if self.translations.present?
   end
+  
+  # Create Index
+  # def create_index_for_pkey pkey, json = :data
+  #   self.class.connection.execute "CREATE INDEX #{pkey}_in_#{json} ON atoms (json_string(#{json},#{self.class.sanitize(pkey)}));"  rescue  nil
+  # end
 
   def atom_code
     <<-CODE

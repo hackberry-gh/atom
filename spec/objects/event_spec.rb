@@ -10,7 +10,7 @@ describe :event do
     evt = Event.create!(source_id: source.id, target_id: target.id,
     context_id: ctx.id, program_id: prg.id)
     evt.trigger
-
+    evt.status.must_equal Event::DONE
   end
 
 end

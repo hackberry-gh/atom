@@ -13,7 +13,7 @@ signup_context:
     test: |
       source.email == "signup@test.com"
     result: |
-      target.count == 1
+      target.count >= 1
   hooks:
     before_test: |
       puts "Before Signup Test"

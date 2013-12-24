@@ -1,8 +1,8 @@
-require 'pubs/static_element'
+require 'pubs/objects/static'
 
 class Event < Atom
 
-  include Pubs::StaticElement
+  include Pubs::Objects::Static
 
   IDLE = 0
   BUSY = 1
@@ -17,6 +17,7 @@ class Event < Atom
     group: #{self.name.tableize}
     primary_key: id
     attributes:
+      static: Boolean
       source_id: String
       target_id: String
       context_id: String
@@ -24,8 +25,13 @@ class Event < Atom
       status: Integer
     YAML
   end
+  
+  default_scope -> { where(element_id: element.id) }  
 
   validates_presence_of :source_id, :target_id, :context_id, :program_id
+
+  after_create :add_to_sequence
+  after_initialize :set_status
 
   [:source,:target,:context,:program].each do |rel|
     define_method rel do
@@ -51,7 +57,10 @@ class Event < Atom
       end
     end
     self.json_update(status: check)
-    context.run_hook :after
+    
+    remove_from_sequence
+    
+    context.run_hook :after 
   end
 
   def set_status
@@ -59,13 +68,35 @@ class Event < Atom
   end
 
   def trigger
+    return if self.status != IDLE
+    
     run_callbacks :trigger do
       if context.test binding
         program.execute binding
       end
     end
   end
+  
+  def notify
+    diff = context.run_at - Time.now.to_i
+    if diff > 0
+      puts "--> timered #{diff}"
+      EM.add_timer(diff){ trigger }
+    else
+      trigger
+    end  
+  end
 
+  def sequence
+    Sequence.fetch(context.run_at)
+  end
 
+  def add_to_sequence
+    sequence.push self.id
+  end
+  
+  def remove_from_sequence
+    sequence.push self.id
+  end
 
 end

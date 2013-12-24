@@ -1,13 +1,14 @@
-require 'pubs/static_element'
+require 'pubs/objects/static'
+
 class Program < Atom
 
-  include Pubs::StaticElement
+  include Pubs::Objects::Static
 
   def self.element_data
     <<-YAML
     name: #{self.name}
     group: #{self.name.tableize}
-    primary_key: id
+    primary_key: slug
     attributes:
       static: Boolean
       name: String
@@ -15,21 +16,23 @@ class Program < Atom
       code: String
       result: String
       error: String
-      started_at: Integer
-      finished_at: Integer
+      started_at: DateTime
+      finished_at: DateTime
     YAML
   end
+
+  default_scope -> { where(element_id: element.id) }  
 
   store_accessor :data, :name, :slug, :code, :result, :error, :started_at, :finished_at
   validates_presence_of :name, :code
   define_callbacks :execute
 
   set_callback :execute, :before do
-    self.json_update(started_at: Time.now.to_i)
+    self.json_update(started_at: Time.now)
   end
 
   set_callback :execute, :before do
-    self.json_update(finished_at: Time.now.to_i)
+    self.json_update(finished_at: Time.now)
   end
 
   def execute binding = nil

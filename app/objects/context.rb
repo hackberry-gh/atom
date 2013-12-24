@@ -11,6 +11,8 @@ class Context < Program
       hooks: Object
     YAML
   end
+  
+  default_scope -> { where(element_id: element.id) }
 
   store_accessor :data, :run_at, :hooks
 
@@ -31,6 +33,8 @@ class Context < Program
   end
 
   after_initialize :parse_run_at
+  # validate :ensure_run_at_in_the_feature
+  
 
   attr_accessor :conditions
 
@@ -61,8 +65,12 @@ class Context < Program
   private
 
   def parse_run_at
-    self.run_at = self.run_at.is_a?(String) ? Time.send(:eval,self.run_at).to_i : Time.now.to_i
+    return if self.run_at.is_a?(Integer)
+    self.run_at = (self.run_at.is_a?(String) ? Time.send(:eval,self.run_at) : Time.now).to_i
   end
-
+  
+  # def ensure_run_at_in_the_feature
+  #   self.errors.add(:run_at, "Must be in the future") if self.run_at <= Time.now.to_i
+  # end
 
 end
