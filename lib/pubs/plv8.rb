@@ -4,23 +4,40 @@ module Pubs
   module PLV8
 
     extend ActiveSupport::Concern
-    #include ActiveRecord::Sanitization::ClassMethods
 
-    PLV8_METHODS = %w(string
-    int
-    int_array
-    float
-    bool
-    date
-    increment
-    decrement
-    set_numeric
-    set
-    update
-    push
-    add_to_set
-    pull
-    data).freeze
+
+    # json_string
+    # json_int
+    # json_int_array
+    # json_float
+    # json_bool
+    # json_date
+
+    # json_select
+    # json_select_all
+
+    # json_update
+    # json_push
+    # json_add_to_set
+    # json_pull
+    # json_increment
+    # json_decrement
+
+    TYPES = {
+      "String" => "string",
+      "Integer" => "int",
+      "Array" => "int_array",
+      "Float" => "float",
+      "Boolean" => "bool",
+      "Date" => "date",
+      "DateTime" => "date",
+      "Time" => "date",
+      "Object" => "object",
+    }.freeze
+
+    STRING = "string"
+
+    DISCARD = [:id,:element_id,:created_at,:updated_at,:atoms_count].freeze
 
     EQ = "=".freeze
     ILIKE = "ilike".freeze
@@ -30,57 +47,105 @@ module Pubs
     GTE = ">=".freeze
     NEQ = "!=".freeze
 
-
     module ClassMethods
 
-      def json_where key, value, operator = EQ, plv8_method = PLV8_METHODS[0]
-        json_query :where, plv8_method, key, operator, value
+      # def select *fields
+      #   super(*fields.map{ |field| json_select(field) })
+      # end
+
+      def where *args
+        return super(*args) unless args.first.is_a? Hash
+        super(*args.map{ |condition| json_condition(condition) })
       end
 
-      def json_find_by key, value, plv8_method = PLV8_METHODS[0]
-        json_query :find_by, plv8_method, key, EQ, value
+      def find_by *args
+        return super(*args) unless args.first.is_a? Hash
+        super(*args.map{ |condition| json_condition(condition) })
       end
 
-      def json_query method, plv8_method, key, operator, value
-        raise RuntimeError, "#{plv8_method} not defined" unless PLV8_METHODS.include?(plv8_method)
-        self.send method, "json_#{plv8_method}(#{json_store_attribute},?) #{operator} ?", key, value
+      def json_condition condition
+
+        key = condition.keys.first
+
+        return condition if DISCARD.include?(key)
+
+        value = condition.values.first
+        case value
+        when Array
+          operator, value = value
+        when Hash
+          operator, value = value.to_a.flatten
+        else
+          operator = EQ
+        end
+
+        type = self.store == :meta ? STRING : (TYPES[self.element.attributes[key]] || STRING)
+        "json_#{type}(#{store},#{sanitize(key)}) #{operator} #{sanitize(value)}"
       end
 
-      def json_store_attribute
-        self.name == "Element" ? :meta : :data
+      def json_query fields, etc = nil
+
+        fields = field.join(",") if fields.is_a?(Array)
+        if fields.include?(",")
+          as = self.table_name
+          fields = "json_select_all(#{self.store},#{sanitize(fields)})"
+        else
+          as = fields
+          fields = "json_select(#{self.store},#{sanitize(fields)},true)"
+        end
+
+        sql = "SELECT #{fields} AS #{as} FROM #{self.table_name} "
+        sql += "#{sanitize(sql)}" if etc
+        self.connection.execute(sql).to_a
+
+      end
+
+      def json_update params, conditions = nil, sync = true
+        update = "json_update(#{self.store},#{sanitize(params.to_json)}, #{sync}) "
+        json_func update, conditions
+      end
+
+      def json_func update, conditions
+        sql = "UPDATE #{self.table_name} SET #{self.store} = #{update} "
+        sql += "WHERE #{(conditions)} " unless conditions.nil?
+        sql += "RETURNING *"
+        connection.exec_query(sql)
+      end
+
+      def store
+        @@store = self.name == "Element" ? :meta : :data
       end
 
     end
-    
+
+    def json_update params, sync = true
+
+      result = self.class.json_update params, json_conditions, sync
+      process_result result
+
+    end
+
     def json_increment! key, amount = 1
-      json_update_column key, amount, PLV8_METHODS[6]
+      update = "json_increment(#{self.class.store},#{self.class.sanitize(key)},#{amount}) "
+      result = self.class.json_func update, json_conditions
+      process_result result
     end
-    
+
     def json_decrement! key, amount = 1
-      json_update_column key, amount, PLV8_METHODS[7]
-    end    
-
-    def json_setn key, number
-      json_update_column key,number,PLV8_METHODS[8]
+      update = "json_decrement(#{self.class.store},#{self.class.sanitize(key)},#{amount}) "
+      result = self.class.json_func update, json_conditions
+      process_result result
     end
 
-    def json_set key, string
-      json_update_column key,string,PLV8_METHODS[9]
+    def json_conditions
+      @conditions ||= "id = '#{self.id}'"
     end
 
-    def json_update key, json
-      json_update_column key, json.to_json, PLV8_METHODS[10]
-    end
-
-    def json_push dotted_key, json
-      json_update_column dotted_key, json.to_json, PLV8_METHODS[10]
-    end
-
-    def json_update_column key, value, plv8_method
-      # update = self.class.send(:sanitize_sql_for_assignment,["json_#{plv8_method}(#{self.class.json_store_attribute},?,?)",key,value])
-      update = "json_#{plv8_method}(#{self.class.json_store_attribute},#{self.class.sanitize(key)},#{self.class.sanitize(value)})"
-      result = self.class.connection.exec_query("UPDATE #{self.class.table_name} SET #{self.class.json_store_attribute} = #{update} WHERE id = '#{self.id}' RETURNING json_string(#{self.class.json_store_attribute},'#{key}') AS #{key}")
-      self.send(:"#{key}=",result.first.to_hash[key.to_s])
+    def process_result result
+      values = result.to_a.first
+      result.column_types.each{ |key,oid|
+        self.send(:"#{key}=",oid.type_cast(values[key]))
+      }
     end
 
   end

@@ -50,7 +50,7 @@ class Element < ActiveRecord::Base
 
   store_accessor :meta, :name, :group, :primary_key,
   :attributes, :validations, :callbacks, :translations, :settings
-  
+
   localize :meta, :attributes, :validations, :callbacks, :translations, :settings
 
   STUB = "Stub".freeze
@@ -65,6 +65,7 @@ class Element < ActiveRecord::Base
 
   attr_accessor :redefine
 
+
   # NOTE: Don't forget, only first level of json is indifferent accessible!
   %w(csv_attributes public_attributes).each { |attr_name|
     class_eval <<-CODE
@@ -73,7 +74,7 @@ class Element < ActiveRecord::Base
     end
     CODE
   }
-  
+
   def i18n_attributes
     settings.try(:[],:i18n_attributes).try(:map,&:to_sym) || []
   end
@@ -89,18 +90,18 @@ class Element < ActiveRecord::Base
   def class_defined?
     Object.const_defined?(self.class_name)
   end
-  
+
   def class_name
     self.name
   end
 
   private
 
-  def gen! 
+  def gen!
     if self.redefine || !class_defined?
 
       self.redefine = false
-      
+
       # skip class registration if atom is staticly typed
       if self.attributes[:static].nil?
         # Hmm, removing and readding a constant on the fly
@@ -110,7 +111,7 @@ class Element < ActiveRecord::Base
         # Generate and define new Element Class
         Object.module_eval atom_code
       end
-      
+
       define!
     end
   end
@@ -129,7 +130,7 @@ class Element < ActiveRecord::Base
     # data attributes
     klass.send :store_accessor, :data, *self.persistent_attributes
     # localize data attributes if i18n added
-    klass.try :localize, :data, *self.i18n_attributes      
+    klass.try :localize, :data, *self.i18n_attributes
     # stubs
     klass.send :attr_accessor, *self.stub_attributes
 
@@ -140,7 +141,7 @@ class Element < ActiveRecord::Base
       # lazy conversion of hash into ruby code
       klass.class_eval hash.map{ |k,v| k.to_s + v.to_s }.join("\n")
     }
-    
+
     klass
   end
 
@@ -157,22 +158,14 @@ class Element < ActiveRecord::Base
       I18n.backend.store_translations(I18n.locale, {k => v})
     } if self.translations.present?
   end
-  
+
   def atom_code
     <<-CODE
       class #{class_name} < Atom
         include Pubs::I18n
         default_scope -> { where(element_id: '#{self.id}') }
-        validate :uniq_primary_key, if: "pkey_name.present?"
-        def pkey_name
-          self.element.try(:primary_key).try(:to_sym)
-        end
-        def pkey
-          self.send(self.pkey_name) if self.pkey_name
-        end
-        private
-        def uniq_primary_key
-          errors.add(self.pkey_name, :taken) unless self.class.json_find_by(self.pkey_name, self.pkey).nil?
+        def self.element
+          @@element ||= Element.find_by(id: '#{self.id}')
         end
       end
     CODE

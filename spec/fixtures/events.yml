@@ -1,35 +1,34 @@
 signup_source:
-  email: "signup@test.com"    
+  email: "signup@test.com"
   first_name: "name"
   last_name: "surname"
-  
+
 signup_target:
   src: "twitter"
   count: 0
 
 signup_context:
-  name: "signup context"  
+  name: "signup context"
   code:
     test: |
       source.email == "signup@test.com"
     result: |
-      target.count == 1    
+      target.count == 1
   hooks:
     before_test: |
       puts "Before Signup Test"
     after_test: |
-      puts "After Signup Test"  
+      puts "After Signup Test"
     before: |
       puts "BEFORE SIGNUP"
     after: |
-      puts "AFTER SIGNUP"      
+      puts "AFTER SIGNUP"
     failed: |
-      puts "FAILED!!!"            
+      puts "SIGNUP FAILED!!!"
     done: |
-      puts "DONE!!!"      
-    
+      puts "SIGNUP DONE!!!"
+
 signup_program:
   name: "signup count incrementer"
   code: |
     target.json_increment!(:count)
-    
