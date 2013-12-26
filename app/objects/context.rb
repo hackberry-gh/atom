@@ -1,49 +1,40 @@
-class Context < Program
+require 'pubs/objects/static'
 
-  def self.element_data
-    <<-YAML
-    name: #{self.name}
-    group: #{self.name.tableize}
-    primary_key: id
-    attributes:
-      static: Boolean
-      run_at: Integer
-      hooks: Object
-    YAML
-  end
+class Context < Atom #Program
   
-  default_scope -> { where(element_id: element.id) }
+  include Pubs::Objects::Static
 
-  store_accessor :data, :run_at, :hooks
+  define %(
+  name: Context
+  group: contexts
+  primary_key: slug
+  attributes:
+    static: Boolean
+    name: String
+    slug: String
+    conditions: String
+    result: String
+    error: String
+    started_at: DateTime
+    finished_at: DateTime
+    run_at: Integer
+    hooks: Object
+  validations:
+    validates_presence_of: ':name, :conditions'
+  callbacks:
+    before_save: ':set_slug'
+    after_initialize: ':parse_run_at'
+  )
 
   define_callbacks :test
 
-  scope :ready, -> (span) {
-    where(run_at: [GTE, (Time.now - span).to_i], run_at: [LTE, (Time.now + span).to_i])
-  }
-
   [:before,:after].each do |event|
-    # [:test,:execute].each do |method|
-    [:test].each do |method|
-      define_method :"#{event}_#{method}" do
-        run_hook(:"#{event}_#{method}")
+
+      define_method :"#{event}_test" do
+        run_hook(:"#{event}_test")
       end
-      set_callback method, event, :"#{event}_#{method}"
-    end
-  end
+      set_callback :test, event, :"#{event}_test"
 
-  after_initialize :parse_run_at
-  # validate :ensure_run_at_in_the_feature
-  
-
-  attr_accessor :conditions
-
-  def conditions
-    self.code
-  end
-
-  def conditions=conditions
-    self.code=conditions
   end
 
   def test binding = nil
@@ -61,8 +52,23 @@ class Context < Program
       run(hook)
     end
   end
+  
+  def run code, binding = nil
+    begin
+      result = eval(code, binding)
+      self.json_update(result: result || :nil)
+      result
+    rescue Exception => e
+      self.json_update(error: e.message+"\n----\n"+e.backtrace.join("\n"))
+      return false
+    end
+  end
 
   private
+
+  def set_slug
+    self.slug = self.name.parameterize
+  end
 
   def parse_run_at
     return if self.run_at.is_a?(Integer)

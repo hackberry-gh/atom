@@ -2,12 +2,14 @@ describe :plv8 do
 
 
   it "replace where and find_by with json conditions" do
+    Element.delete_all
     Element.create!(fixture(:elements,:user))
     Element.where(name: "User").count.must_equal 1
     Element.find_by(name: "User").must_equal Element.first
   end
 
   it "dot notation works" do
+    Element.delete_all    
     Element.create!(fixture(:elements,:article))
     ar = Article.create!(fixture(:atoms,:article))
     Article.where("i18n.en.title" => "Article").count.must_equal 1
@@ -15,6 +17,7 @@ describe :plv8 do
   end
 
   it "selects only given fields" do
+    Element.delete_all
     Element.create!(fixture(:elements,:user))
     # ap Element.connection.execute("SELECT json_select(meta,'name') as name FROM elements").entries
     JSON.parse(Element.json_query("name,group,attributes")[0]["elements"]).must_equal ["User","users",
@@ -22,6 +25,7 @@ describe :plv8 do
   end
 
   it "update json data" do
+    Element.delete_all    
     Element.create!(fixture(:elements,:article))
     ar = Article.create!(fixture(:atoms,:article))
     ar.json_update(i18n: {en: {title: "BONANZA"}})

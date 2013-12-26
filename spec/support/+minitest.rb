@@ -10,6 +10,10 @@ class MiniTest::Spec
   before :each do
     I18n.locale = I18n.default_locale
     DatabaseCleaner.start
+    Program.redefine        
+    Context.redefine
+    Sequence.redefine        
+    Event.redefine        
   end
 
   after :each do

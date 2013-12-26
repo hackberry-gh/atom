@@ -9,7 +9,7 @@ signup_target:
 
 signup_context:
   name: "signup context"
-  code:
+  conditions:
     test: |
       source.email == "signup@test.com"
     result: |

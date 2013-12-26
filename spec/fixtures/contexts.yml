@@ -4,7 +4,7 @@ truman:
   hooks:
     before_test: |
       puts "Before Test"
-    after_test: 
+    after_test: |
       puts "After Test"  
   conditions:
     test: |
@@ -15,7 +15,7 @@ failing:
   hooks:
     before_test: |
       puts "Before Test"
-    after_test: 
+    after_test: | 
       puts "After Test"  
   conditions:
     test: |

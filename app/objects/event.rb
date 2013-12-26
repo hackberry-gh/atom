@@ -4,34 +4,28 @@ class Event < Atom
 
   include Pubs::Objects::Static
 
+  define %(
+  name: Event
+  group: events
+  primary_key: id
+  attributes:
+    static: Boolean
+    source_id: String
+    target_id: String
+    context_id: String
+    program_id: String
+    status: Integer
+  validations:
+    validates_presence_of: ':source_id, :target_id, :context_id, :program_id'
+  callbacks:
+    after_initialize: ':set_status'  
+    after_create: ':add_to_sequence'
+  )
+  
   IDLE = 0
   BUSY = 1
   FAILED = 2
   DONE = 3
-
-  store_accessor :data, :source_id, :target_id, :context_id, :program_id, :status
-
-  def self.element_data
-    <<-YAML
-    name: #{self.name}
-    group: #{self.name.tableize}
-    primary_key: id
-    attributes:
-      static: Boolean
-      source_id: String
-      target_id: String
-      context_id: String
-      program_id: String
-      status: Integer
-    YAML
-  end
-  
-  default_scope -> { where(element_id: element.id) }  
-
-  validates_presence_of :source_id, :target_id, :context_id, :program_id
-
-  after_create :add_to_sequence
-  after_initialize :set_status
 
   [:source,:target,:context,:program].each do |rel|
     define_method rel do
@@ -63,10 +57,6 @@ class Event < Atom
     context.run_hook :after 
   end
 
-  def set_status
-    self.status ||= IDLE
-  end
-
   def trigger
     return if self.status != IDLE
     
@@ -91,6 +81,8 @@ class Event < Atom
     Sequence.fetch(context.run_at)
   end
 
+  private
+  
   def add_to_sequence
     sequence.push self.id
   end
@@ -98,5 +90,9 @@ class Event < Atom
   def remove_from_sequence
     sequence.push self.id
   end
+  
+  def set_status
+    self.status ||= IDLE
+  end  
 
 end
