@@ -1,3 +1,26 @@
+# Sequence
+# ========
+# A group of events to run or doing something else
+#
+# ClassMethods
+# ===========
+# get([time=Time.now])
+# - finds current sequence
+#
+# fetch([time=Time.now])
+# - finds or creates new sequence by giving time
+#
+# events([ids=self.event_ids])
+# - retrives all events with given ids
+#
+# push(Event)
+# pushes event at the end of sequence
+#
+# pull(Event)
+# removes event from sequence
+#
+# TODO: move database backend to memcache!!!
+
 require 'pubs/objects/static'
 
 class Sequence < Atom

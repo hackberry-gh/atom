@@ -1,3 +1,26 @@
+# Context
+# ====
+# A set of logical rules to test certain conditions
+# at any point in time
+#
+# Properties
+# ==========
+# look define method
+#
+# Instance Methods
+# ================
+# test([binding])
+# - runs test and records result
+#
+# check!
+# - runs test without callbacks
+#
+# run_hook(name)
+# - runs hook with given name
+# 
+# run(code,[binding])
+# - runs arbitary ruby code, saves result in db
+
 require 'pubs/objects/static'
 
 class Context < Atom #Program

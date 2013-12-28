@@ -1,3 +1,27 @@
+# Event
+# ====
+# An action to run another actions within a context 
+#
+# Properties
+# ==========
+# look define method
+#
+# Relations
+# ==========
+# - source, Atom
+# - target, Atom
+# - context, Context
+# - program, Program
+# - sequence, Sequence
+#
+# Instance Methods
+# ================
+# - trigger
+#   runs program if test passes
+#
+# - notify
+#   checks run_at of context then schedule if it's in the future, triggers itself otherwise
+
 require 'pubs/objects/static'
 
 class Event < Atom
@@ -56,6 +80,10 @@ class Event < Atom
     
     context.run_hook :after 
   end
+  
+  def sequence
+    Sequence.fetch(context.run_at)
+  end  
 
   def trigger
     return if self.status != IDLE
@@ -75,10 +103,6 @@ class Event < Atom
     else
       trigger
     end  
-  end
-
-  def sequence
-    Sequence.fetch(context.run_at)
   end
 
   private

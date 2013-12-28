@@ -1,3 +1,59 @@
+# Atoms API
+# ============
+#
+# GET /atoms
+# -------------
+# Retrives all atoms
+# 
+# Params:
+# - element:String | element_id:UUID, [page:Integer], [limit[100]:Integer], [filter:Object]
+#
+# Example:
+# HTTP GET http://atom.pubs.io/atoms?page=1&limit=50&filter[name]=user
+#
+#
+# GET /atom
+# -------------
+# Retrives single atom
+# 
+# Params:
+# - element:String | element_id:UUID, find_by:Object | id:UUID | field:value
+#
+# Example:
+# HTTP GET http://atom.pubs.io/atoms?id=usk11202
+#
+#
+# POST /atoms
+# -------------
+# Retrives single atom
+# 
+# Params:
+# - element:String | element_id:UUID, create:Object
+#
+#
+# PUT /atom
+# -------------
+# Updates an atom with full callbacks and returning object
+# 
+# Params:
+# - element:String | element_id:UUID, find:Object, create:Object
+#
+#
+# PATCH /atom
+# -------------
+# Updates an atom without callbacks not validations and returning id
+# 
+# Params:
+# - element:String | element_id:UUID, find:Object, create:Object
+#
+#
+# DELETE /atom
+# -------------
+# Destroys an atom
+# 
+# Params:
+# - element:String | element_id:UUID, find:Object
+
 require 'pubs/api'
 require 'pubs/api/crud'
 

@@ -1,11 +1,30 @@
 # Atom
 # ====
-# An instance of Element with data!
-# If Element is the model then Atom is the record.
+# Abstract Class for other Atom Classes
+# Atoms hold real data of Element types.
 #
 # Properties
 # ==========
+# - id, UUID
 # - data, JSON
+# - created_at, DateTime
+# - updated_at, DateTime
+#
+# Relations
+# ==========
+# - element, Element
+#
+# Instance Methods
+# ================
+# - pkey_name, String
+#   custom primary_key field name, can be set from Elemenet
+# - pkey, *
+#   custom primary_key field value
+# - to_csv, String
+#   serializes Atom as csv string with headers of Element#settings[:csv_attributes]
+# - as_json, String
+#   serializes Atom as json string with headers of Element#settings[:public_attributes]
+
 require 'csv'
 require 'pubs/plv8'
 
@@ -21,7 +40,6 @@ class Atom < ActiveRecord::Base
 
   validate :uniq_primary_key, if: "pkey_name.present?"
 
-
   def pkey_name
     self.element.try(:primary_key).try(:to_sym)
   end
@@ -34,7 +52,7 @@ class Atom < ActiveRecord::Base
   
   def to_csv csv_attributes = element.csv_attributes
     csv_attributes.map{ |key|
-      key.split(".").inject(self.data){ |data,key| data.try(:[],key) }
+      key.to_s.split(".").inject(self.data){ |data,key| data.try(:[],key) }
     }.to_csv
   end
 

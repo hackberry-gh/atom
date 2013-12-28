@@ -4,7 +4,7 @@ require 'api/elements'
 describe :elements do
 
 
-  let(:api_options) { {:verbose => true, :log_stdout => true, :config => "config/server.rb" } }
+  let(:api_options) { {:verbose => true, :log_stdout => false, :config => "config/server.rb" } }
   let(:guest_head) { {'X-Api-Key' => 'guest'} }
 
   it 'renders 200 for /status' do

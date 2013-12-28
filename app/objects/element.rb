@@ -5,25 +5,22 @@
 #
 # Properties
 # ==========
-# id: UUID, Uniq ID of an Element Object, Primary Key
-# meta: JSON, holds data model information of an Atom Object
-# default meta structure is;
-# - name, String, name of the element
-# - group, String, *optional, plural name of the element,
-# autogenerating if not giving
-# - primary_key, String, *optional, uniq primary key, first attribute selecting
-# if not given
-# - attributes, JSON, {field_name: 'DataType'}
-# - validations, JSON, *optional, {validator: 'parameters'}, ActiveRecord Validatiors
-# - callbacks, JSON, *optional, {callback: 'event_name'}, Event Object to notify
-# - settings, JSON, *optional, {key: 'value'}, Customisable options
-# - translations, JSON
-# - i18n, JSON
-# - settings, JSON
-# -- i18n_attributes, keys for translatable attributes
-# -- public_attributes map of json representation
-# -- csv_attributes to download desired columns as csv
-# -- stub_attributes to skip saving data in db
+# -- id: UUID, Uniq ID of an Element Object, Primary Key
+# -- meta: JSON, holds data model information of an Atom Object
+# --- name, String, name of the element
+# --- group, String, *optional, plural name of the element, autogenerating if not giving
+# --- primary_key, String, *optional, uniq primary key, first attribute selecting if not given
+# --- attributes, JSON, {field_name: 'DataType'}
+# --- validations, JSON, *optional, {validator: 'parameters'}, ActiveRecord Validatiors
+# --- callbacks, JSON, *optional, {callback: 'event_name'}, Event Object to notify
+# --- settings, JSON, *optional, {key: 'value'}, Customisable options
+# --- translations, JSON
+# --- i18n, JSON
+# --- settings, JSON
+# ---- i18n_attributes, keys for translatable attributes
+# ---- public_attributes map of json representation
+# ---- csv_attributes to download desired columns as csv
+# ---- stub_attributes to skip saving data in db
 #
 # Example
 # =======

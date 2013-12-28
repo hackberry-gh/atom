@@ -1,3 +1,20 @@
+# Program
+# ====
+#  A ruby program to accomplish certain tasks
+#
+# Properties
+# ==========
+# look define method
+#
+#
+# Instance Methods
+# ================
+# - execute([binding])
+#   runs it's code with callbacks
+#
+# - run(code,[binding])
+#   runs arbitary ruby code, saves result in db
+
 require 'pubs/objects/static'
 
 class Program < Atom

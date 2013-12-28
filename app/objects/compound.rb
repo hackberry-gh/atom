@@ -5,6 +5,35 @@
 # basically proxies class methods to available member classes
 # in other words unified interface for same element atoms
 #
+# Class Methods
+# =============
+# register_element(Element)
+# - Generates localised Atom classes of given element, ie: User::En
+#
+# unregister
+# - Removes registered localised classes
+#
+# register_locales
+# - Registers Atom classes for all available locales (via ClassName)
+#
+# atom_class
+# - Determines Element name from ClassName
+#
+# locale_class_name
+# - Localised Atom class name
+#
+# class_name
+# - Compound class name
+#
+# members
+# registered atoms
+#
+# members=Array
+# - sets registeres atoms
+#
+# new(*args)
+# - Creates new localised instance of existing member
+#
 # Example
 # =======
 # class User < Compound
@@ -77,8 +106,7 @@ class Compound
     def class_name locale = I18n.locale
       "#{atom_class}::#{locale_class_name(locale)}"
     end
-    
-    
+     
     def members
       @@members ||= {}
     end
