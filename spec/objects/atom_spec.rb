@@ -7,7 +7,15 @@ describe :atom do
   it "should be instance of it's elements type" do
     
     element = Element.create!(fixture(:elements,:user))
-    user = User.create(fixture(:atoms,:user))
+    user = User.create!(fixture(:atoms,:user))
+    user.element.must_equal element
+    
+  end
+  
+  it "should be created by element" do
+    
+    element = Element.create!(fixture(:elements,:user))
+    user = element.atoms.create!(fixture(:atoms,:user))
     user.element.must_equal element
     
   end

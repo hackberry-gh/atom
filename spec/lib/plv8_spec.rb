@@ -20,7 +20,7 @@ describe :plv8 do
     Element.delete_all
     Element.create!(fixture(:elements,:user))
     # ap Element.connection.execute("SELECT json_select(meta,'name') as name FROM elements").entries
-    JSON.parse(Element.json_query("name,group,attributes")[0]["elements"]).must_equal ["User","users",
+    JSON.parse(Element.json_query("name,group,attributes")[0]).must_equal ["User","users",
       {"email" => "String","first_name" => "String", "last_name" => "String"}]
   end
 

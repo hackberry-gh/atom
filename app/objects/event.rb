@@ -41,7 +41,7 @@ class Event < Atom
   end
 
   set_callback :trigger, :after do
-    check = begin
+    self.status = begin
       if context.check! binding
         context.run_hook(:done)
         DONE
@@ -50,7 +50,7 @@ class Event < Atom
         FAILED
       end
     end
-    self.json_update(status: check)
+    self.json_update(status: self.status)
     
     remove_from_sequence
     
@@ -88,7 +88,7 @@ class Event < Atom
   end
   
   def remove_from_sequence
-    sequence.push self.id
+    sequence.pull self.id
   end
   
   def set_status

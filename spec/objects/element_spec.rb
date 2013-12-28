@@ -30,4 +30,16 @@ describe :element do
     
   end
   
+  it "should serialize nicely" do
+    json = Element.create!(fixture(:elements,:counter)).to_json
+    JSON.parse(json)["name"].must_equal "Counter"
+  end
+  
+  it "returns json from postgresql" do
+    Element.delete_all
+    Element.create!(fixture(:elements,:counter))
+    json = Element.row_to_json(Element.where(id: Element.first.id).select(:id,:meta,:atoms_count).limit(1).to_sql)
+    json.must_equal Element.first.raw_json(except:["created_at","updated_at"])
+  end
+  
 end

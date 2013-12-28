@@ -1,7 +1,7 @@
 # real time stdout
 $stdout.sync = true
 
-%w(. lib).each do |dir|
+%w(. lib app).each do |dir|
   path = File.expand_path( "../../#{dir}", __FILE__)
   $LOAD_PATH.unshift(path) unless $LOAD_PATH.include?(path)
 end

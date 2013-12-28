@@ -40,13 +40,13 @@ class Program < Atom
   end
 
   def run code, binding = nil
-    begin
+    self.result = begin 
       result = eval(code, binding)
       self.json_update(result: result || :nil)
       result
     rescue Exception => e
       self.json_update(error: e.message+"\n----\n"+e.backtrace.join("\n"))
-      return false
+      false
     end
   end
 

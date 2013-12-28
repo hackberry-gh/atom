@@ -48,6 +48,14 @@ module Pubs
     NEQ = "!=".freeze
 
     module ClassMethods
+      
+      def array_to_json sql
+        self.connection.select_value("select array_to_json(coalesce(array_agg(row_to_json(t)), '{}')) from (#{sql}) t")
+      end
+  
+      def row_to_json sql
+        self.connection.select_value("select row_to_json(t) from (#{sql}) t")
+      end
 
       # def select *fields
       #   super(*fields.map{ |field| json_select(field) })
@@ -63,12 +71,11 @@ module Pubs
         super(*args.map{ |condition| json_condition(condition) })
       end
 
-
       def json_condition condition
 
         key = condition.keys.first
 
-        return condition if DISCARD.include?(key)
+        return condition if DISCARD.include?(key.to_sym)
 
         value = condition.values.first
         case value
@@ -84,9 +91,9 @@ module Pubs
         "json_#{type}(#{store},#{sanitize(key)}) #{operator} #{sanitize(value)}"
       end
 
-      def json_query fields, etc = nil
+      def json_query fields, etc = nil, run = true
 
-        fields = field.join(",") if fields.is_a?(Array)
+        fields = fields.join(",") if fields.is_a?(Array)
         if fields.include?(",")
           as = self.table_name
           fields = "json_select_all(#{self.store},#{sanitize(fields)})"
@@ -96,8 +103,8 @@ module Pubs
         end
 
         sql = "SELECT #{fields} AS #{as} FROM #{self.table_name} "
-        sql += "#{sanitize(sql)}" if etc
-        self.connection.execute(sql).to_a
+        sql += "#{sanitize(etc)}" if etc
+        run ? self.connection.select_values(sql) : sql
 
       end
 
@@ -106,11 +113,11 @@ module Pubs
         json_func update, conditions
       end
 
-      def json_func update, conditions
+      def json_func update, conditions, meth = :select_values #:exec_query
         sql = "UPDATE #{self.table_name} SET #{self.store} = #{update} "
         sql += "WHERE #{(conditions)} " unless conditions.nil?
         sql += "RETURNING *"
-        connection.exec_query(sql)
+        connection.send(meth,sql)
       end
 
       def store
@@ -121,31 +128,31 @@ module Pubs
 
     def json_update params, sync = true
       result = self.class.json_update params, json_conditions, sync
-      process_result result
+      # process_result result
     end
 
     def json_push key, item
       update = "json_push(#{self.class.store},#{self.class.sanitize(key)},#{self.class.sanitize(item.to_json)}) "
       result = self.class.json_func update, json_conditions
-      process_result result
+      # process_result result
     end
 
     def json_pull key, item
       update = "json_pull(#{self.class.store},#{self.class.sanitize(key)},#{self.class.sanitize(item.to_json)}) "
       result = self.class.json_func update, json_conditions
-      process_result result
+      # process_result result
     end
 
     def json_increment! key, amount = 1
       update = "json_increment(#{self.class.store},#{self.class.sanitize(key)},#{amount}) "
       result = self.class.json_func update, json_conditions
-      process_result result
+      # process_result result
     end
 
     def json_decrement! key, amount = 1
       update = "json_decrement(#{self.class.store},#{self.class.sanitize(key)},#{amount}) "
       result = self.class.json_func update, json_conditions
-      process_result result
+      # process_result result
     end
 
     def json_conditions

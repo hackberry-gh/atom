@@ -61,30 +61,30 @@ class Element < ActiveRecord::Base
 
   after_save :gen!
 
+  before_destroy :stash
   after_destroy :pop!
 
   attr_accessor :redefine
-
-
+  
   # NOTE: Don't forget, only first level of json is indifferent accessible!
   %w(csv_attributes public_attributes).each { |attr_name|
     class_eval <<-CODE
     def #{attr_name}
-      (attr_settings = settings.try(:[],:#{attr_name}) ? attr_settings.keys.map(&:to_sym) : persistent_attributes)
+      @#{attr_name} ||= (attr_settings = settings.try(:[],:#{attr_name}) ? attr_settings.keys.map(&:to_sym) : persistent_attributes)
     end
     CODE
   }
 
   def i18n_attributes
-    settings.try(:[],:i18n_attributes).try(:map,&:to_sym) || []
+    @i18n_attributes ||= settings.try(:[],:i18n_attributes).try(:map,&:to_sym) || []
   end
 
   def persistent_attributes
-    attributes.select{|name,type| type != STUB}.keys.map(&:to_sym)
+    @persistent_attributes ||= attributes.select{|name,type| type != STUB}.keys.map(&:to_sym)
   end
 
   def stub_attributes
-    attributes.select{|name,type| type == STUB}.keys.map(&:to_sym)
+    @stub_attributes ||= attributes.select{|name,type| type == STUB}.keys.map(&:to_sym)
   end
 
   def class_defined?
@@ -92,10 +92,32 @@ class Element < ActiveRecord::Base
   end
 
   def class_name
-    self.name
+    @class_name ||= self.name
+  end
+  
+  def atoms
+    self.class_name.constantize.all
+  end
+  
+  def raw_json(options = {})
+    json = {}
+    self.class.columns.map(&:name).each{|k| json[k] = self.send(k)}
+    json = json.delete_if{|k| options[:except].include?(k)} if options[:except]
+    json = json.delete_if{|k| !options[:only].include?(k)} if options[:only]    
+    json.to_json
+  end 
+  
+  def as_json(options = {})
+    json = {id: self.id, created_at: self.created_at, updated_at: self.updated_at, atoms_count: self.atoms_count}
+    self.class.stored_attributes[:meta].each{|k| json[k] = self.send(k)}
+    json    
   end
 
   private
+  
+  def stash
+    @class_name = self.class_name
+  end
 
   def gen!
     if self.redefine || !class_defined?

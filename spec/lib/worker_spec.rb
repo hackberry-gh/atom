@@ -30,7 +30,7 @@ describe :worker do
       end
     }
     
-    (1..10).each { generate.call }
+    # (1..10).each { generate.call }
     
     puts "START #{Time.now}"
     

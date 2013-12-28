@@ -21,19 +21,23 @@ module Pubs
         end
       
         def element
-          Element.find_by(id: class_variable_get(:"@@#{self.name.underscore}_element_id"))
+          Element.find_by(id: element_id)
+        end
+        
+        def element_id
+          class_variable_get(:"@@#{self.name.underscore}_element_id")
         end
       
       end
       
       def element
-        element_id = self.class.class_variable_get(:"@@#{self.class.name.underscore}_element_id")
-        Element.find_by(id: element_id)      
+        Element.find_by(id: self.class.element_id)      
       end
       
       included do
-        default_scope -> { where(element_id: class_variable_get(:"@@#{self.name.underscore}_element_id")) }  
+        default_scope -> { where(element_id: element_id) }  
       end
+      
 
     end
   end

@@ -9,10 +9,10 @@ Pubs.establish_connection
 
 Time.zone = ENV['TIME_ZONE'] || "London"
 
-require 'app/objects/element'
-require 'app/objects/atom'
-require 'app/objects/compound'
-require 'app/objects/program'
-require 'app/objects/context'
-require 'app/objects/event'
-require 'app/objects/sequence'
+require 'objects/element'
+require 'objects/atom'
+require 'objects/compound'
+require 'objects/program'
+require 'objects/context'
+require 'objects/event'
+require 'objects/sequence'
