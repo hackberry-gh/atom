@@ -108,9 +108,9 @@ module Pubs
 
       end
 
-      def json_update params, conditions = nil, sync = true
+      def json_update params, conditions = nil, sync = true, meth = :select_values
         update = "json_update(#{self.store},#{sanitize(params.to_json)}, #{sync}) "
-        json_func update, conditions
+        json_func update, conditions, meth
       end
 
       def json_func update, conditions, meth = :select_values #:exec_query
@@ -126,33 +126,33 @@ module Pubs
 
     end
 
-    def json_update params, sync = true
-      result = self.class.json_update params, json_conditions, sync
-      # process_result result
+    def json_update params, sync = true, meth = :select_values
+      result = self.class.json_update params, json_conditions, sync, meth
+      meth == :exec_query ? process_result(result) : result[0]
     end
 
-    def json_push key, item
+    def json_push key, item, meth = :select_values
       update = "json_push(#{self.class.store},#{self.class.sanitize(key)},#{self.class.sanitize(item.to_json)}) "
-      result = self.class.json_func update, json_conditions
-      # process_result result
+      result = self.class.json_func update, json_conditions, meth
+      meth == :exec_query ? process_result(result) : result
     end
 
-    def json_pull key, item
+    def json_pull key, item, meth = :select_values
       update = "json_pull(#{self.class.store},#{self.class.sanitize(key)},#{self.class.sanitize(item.to_json)}) "
-      result = self.class.json_func update, json_conditions
-      # process_result result
+      result = self.class.json_func update, json_conditions, meth
+      meth == :exec_query ? process_result(result) : result
     end
 
-    def json_increment! key, amount = 1
+    def json_increment! key, amount = 1, meth = :select_values
       update = "json_increment(#{self.class.store},#{self.class.sanitize(key)},#{amount}) "
-      result = self.class.json_func update, json_conditions
-      # process_result result
+      result = self.class.json_func update, json_conditions, meth
+      meth == :exec_query ? process_result(result) : result
     end
 
-    def json_decrement! key, amount = 1
+    def json_decrement! key, amount = 1, meth = :select_values
       update = "json_decrement(#{self.class.store},#{self.class.sanitize(key)},#{amount}) "
-      result = self.class.json_func update, json_conditions
-      # process_result result
+      result = self.class.json_func update, json_conditions, meth
+      meth == :exec_query ? process_result(result) : result
     end
 
     def json_conditions

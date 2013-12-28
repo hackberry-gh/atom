@@ -12,7 +12,7 @@ module Pubs
 
         # Hash to collect all language related info
         def language_info
-          { current: I18n.locale, path: path_locale,
+          { current: ::I18n.locale, path: path_locale,
             browser: browser_locale, country: country_locales }
         end
 
@@ -22,27 +22,30 @@ module Pubs
 
         # Set current locale
         def set_locale
-          I18n.locale =  locale
+          ::I18n.locale =  locale
         end
 
         # Set locale by precedence path, browser, country, default
         def locale
-          return params["locale"] if locale_available?(path_locale)
+
+          return params["locale"] if locale_available?(params["locale"].try(:to_sym))
 
           return path_locale      if locale_available?(path_locale)
+          
+          unless country_locales.nil?            
+            country_locales.each do |country_locale|
+              return country_locale if locale_available? country_locale
+            end 
 
-          country_locales.each do |country_locale|
-            return country_locale if locale_available? country_locale
-          end
-
-          country_locales.each do |country_locale|
-            country_locale = country_locale.split("-").first.to_sym
-            return country_locale if locale_available? country_locale
+            country_locales.each do |country_locale|
+              country_locale = country_locale.split("-").first.to_sym
+              return country_locale if locale_available? country_locale
+            end 
           end
 
           return browser_locale   if locale_available? browser_locale
 
-          I18n.default_locale
+          ::I18n.default_locale
         end
 
         # Extract locale from request path
@@ -62,9 +65,9 @@ module Pubs
           country_info ? country_info[:languages].split(",") : []
         end
 
-        # Check if I18n has locale
+        # Check if ::I18n has locale
         def locale_available? locale
-          I18n.available_locales.include?(locale)
+          ::I18n.available_locales.include?(locale)
         end
 
         # ======================
@@ -89,6 +92,8 @@ module Pubs
             env['REMOTE_ADDR']
           end
         end
+        
+
 
     end
   end

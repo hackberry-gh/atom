@@ -76,7 +76,7 @@ describe :elements do
       e = Element.create!(fixture(:elements,:user))
       ws_client_connect("/ws/element") do |c|
         c.send({method: "PATCH", head: guest_head,  body: {find_by: { id: e.id}, update: {name: "BONANZA"}}}.to_json)
-        ap JSON.parse(c.receive.data).last[0]
+        JSON.parse(c.receive.data).last.must_equal e.id
         e.reload.name.must_equal "BONANZA"
       end
     end
@@ -90,7 +90,7 @@ describe :elements do
 
       ws_client_connect("/ws/element") do |c|
         c.send({method: "DELETE", head: guest_head,  body: {id: e.id}}.to_json)
-        ap JSON.parse(JSON.parse(c.receive.data).last)
+        JSON.parse(JSON.parse(c.receive.data).last)["id"].must_equal e.id 
         -> { User }.must_raise NameError
       end
     end

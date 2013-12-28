@@ -1,6 +1,6 @@
 require 'goliath/websocket'
 require 'pubs/channels'
-
+require 'pubs/api/locale'
 module Pubs
 
   module Api
@@ -9,6 +9,8 @@ module Pubs
   class API < Goliath::WebSocket
 
     include Goliath::Constants
+    include Pubs::Api::Locale
+    
     ACTIVE_RECORD = "ActiveRecord"
     HTTP_SEC_WEBSOCKET_KEY = 'HTTP_SEC_WEBSOCKET_KEY'
 
@@ -105,6 +107,8 @@ module Pubs
     end
 
     def response(env)
+      
+      set_locale
 
       # WebSocket messaging
       if env[REQUEST_PATH].start_with?("/ws")

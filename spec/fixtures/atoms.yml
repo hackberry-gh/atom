@@ -11,6 +11,12 @@ user2:
   email: "user2@test.com"
   first_name: "name"
   last_name: "surname"
+  
+user3:
+  email: "user2@test.com"
+  first_name: "name"
+  last_name: "surname"
+  phone: 123123
 
 article:
   i18n:
