@@ -23,9 +23,9 @@ article:
   attributes:
     title: String
   settings:
-    i18n_attributes: 
+    i18n_attributes:
       - title
-    
+
 multi_user:
   name: User
   group: users

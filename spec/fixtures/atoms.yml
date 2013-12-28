@@ -3,18 +3,18 @@ atom:
     email: "atom@test.com"
 
 user:
-  email: "user@test.com"    
+  email: "user@test.com"
   first_name: "name"
   last_name: "surname"
 
 user2:
-  email: "user2@test.com"    
+  email: "user2@test.com"
   first_name: "name"
-  last_name: "surname"  
-  
+  last_name: "surname"
+
 article:
   i18n:
     en:
-      title: "Article"    
+      title: "Article"
     de:
-      title: "Artikel"    
+      title: "Artikel"

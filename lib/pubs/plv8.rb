@@ -48,11 +48,11 @@ module Pubs
     NEQ = "!=".freeze
 
     module ClassMethods
-      
+
       def array_to_json sql
         self.connection.select_value("select array_to_json(coalesce(array_agg(row_to_json(t)), '{}')) from (#{sql}) t")
       end
-  
+
       def row_to_json sql
         self.connection.select_value("select row_to_json(t) from (#{sql}) t")
       end

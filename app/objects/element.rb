@@ -65,7 +65,7 @@ class Element < ActiveRecord::Base
   after_destroy :pop!
 
   attr_accessor :redefine
-  
+
   # NOTE: Don't forget, only first level of json is indifferent accessible!
   %w(csv_attributes public_attributes).each { |attr_name|
     class_eval <<-CODE
@@ -76,15 +76,15 @@ class Element < ActiveRecord::Base
   }
 
   def i18n_attributes
-    @i18n_attributes ||= settings.try(:[],:i18n_attributes).try(:map,&:to_sym) || []
+    settings.try(:[],:i18n_attributes).try(:map,&:to_sym) || []
   end
 
   def persistent_attributes
-    @persistent_attributes ||= attributes.select{|name,type| type != STUB}.keys.map(&:to_sym)
+    attributes.select{|name,type| type != STUB}.keys.map(&:to_sym)
   end
 
   def stub_attributes
-    @stub_attributes ||= attributes.select{|name,type| type == STUB}.keys.map(&:to_sym)
+    attributes.select{|name,type| type == STUB}.keys.map(&:to_sym)
   end
 
   def class_defined?
@@ -92,29 +92,29 @@ class Element < ActiveRecord::Base
   end
 
   def class_name
-    @class_name ||= self.name
+    self.destroyed? ? @class_name : self.name
   end
-  
+
   def atoms
     self.class_name.constantize.all
   end
-  
+
   def raw_json(options = {})
     json = {}
     self.class.columns.map(&:name).each{|k| json[k] = self.send(k)}
     json = json.delete_if{|k| options[:except].include?(k)} if options[:except]
-    json = json.delete_if{|k| !options[:only].include?(k)} if options[:only]    
+    json = json.delete_if{|k| !options[:only].include?(k)} if options[:only]
     json.to_json
-  end 
-  
+  end
+
   def as_json(options = {})
     json = {id: self.id, created_at: self.created_at, updated_at: self.updated_at, atoms_count: self.atoms_count}
     self.class.stored_attributes[:meta].each{|k| json[k] = self.send(k)}
-    json    
+    json
   end
 
   private
-  
+
   def stash
     @class_name = self.class_name
   end
@@ -163,7 +163,7 @@ class Element < ActiveRecord::Base
       # lazy conversion of hash into ruby code
       klass.class_eval hash.map{ |k,v| k.to_s + v.to_s }.join("\n")
     }
-    
+
     #create_index_for_pkey self.primary_key
 
     klass
@@ -182,7 +182,7 @@ class Element < ActiveRecord::Base
       I18n.backend.store_translations(I18n.locale, {k => v})
     } if self.translations.present?
   end
-  
+
   # Create Index
   # def create_index_for_pkey pkey, json = :data
   #   self.class.connection.execute "CREATE INDEX #{pkey}_in_#{json} ON atoms (json_string(#{json},#{self.class.sanitize(pkey)}));"  rescue  nil
