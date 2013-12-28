@@ -22,13 +22,13 @@ module Pubs
 
         # Set current locale
         def set_locale
-          ::I18n.locale =  locale
+          ::I18n.locale = locale
         end
 
         # Set locale by precedence path, browser, country, default
         def locale
-
-          return params["locale"] if locale_available?(params["locale"].try(:to_sym))
+          params ||= env['params'] || {}
+          return params.try(:[],"locale") if locale_available?(params.try(:[],"locale").try(:to_sym))
 
           return path_locale      if locale_available?(path_locale)
           

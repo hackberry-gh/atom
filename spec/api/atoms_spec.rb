@@ -63,6 +63,7 @@ describe :atoms do
         JSON.parse(c.response)['title'].must_equal "Artikel"
       end
     end
+    I18n.locale = :en
   end
   
   it "respescts i18n content on update" do
@@ -79,6 +80,7 @@ describe :atoms do
         Article.first.title.must_equal "Article"
       end
     end
+    I18n.locale = :en    
     
   end
   

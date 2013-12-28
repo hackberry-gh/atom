@@ -10,11 +10,11 @@ module Pubs
       included do
 
         def self.plural_path
-          @@plural_path ||= self.name.tableize
+          @plural_path ||= self.name.tableize
         end
 
         def self.singular_path
-          @@singular_path ||= plural_path.singularize
+          @singular_path ||= plural_path.singularize
         end
 
         get "/#{plural_path}" do
