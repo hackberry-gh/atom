@@ -56,7 +56,8 @@
 
 require 'pubs/api'
 require 'pubs/api/crud'
-
+require 'pubs/api/access_control'
 class Elements < Pubs::API
   include Pubs::Api::CRUD
+  use Pubs::Api::AccessControl  
 end

@@ -8,6 +8,7 @@ DatabaseCleaner.strategy = :deletion
 class MiniTest::Spec
 
   before :each do
+    Pubs::Api.set_key!("guest", {id: 1, email: "guest@pubs.io", role: "guest"})
     I18n.locale = I18n.default_locale
     DatabaseCleaner.start
     Program.redefine        

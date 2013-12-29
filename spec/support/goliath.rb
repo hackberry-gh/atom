@@ -3,7 +3,7 @@ require 'em-websocket-client'
 require 'goliath/test_helper'
 require 'goliath/test_helper_streaming'
 require 'goliath/test_helper_ws'
-# require 'pubs/api'
+require 'pubs/api'
 
 # require "lib/jobs/base"
 # require "lib/jobs/send_email"
@@ -11,12 +11,10 @@ require 'goliath/test_helper_ws'
 # require 'lib/mailer'
 
 Goliath.env = :test
-# ENV['APP_NAME'] = "pubs-backend"
-# ENV['ALLOWED_ORIGINS'] = "http://localhost:5000"
-# ENV['ALLOWED_ORIGINS'] = "London"
-# Pubs.config(:roles).keys.each_with_index do |role,index|
-#   Pubs::Api.set_key!(role, {id: index, email: "#{role}@pubs.io", role: role})
-# end
+ENV['APP_NAME'] = "atom"
+ENV['ALLOWED_ORIGINS'] = "http://localhost:3000"
+ENV['TIME_ZONE'] = "London"
+
 
 module Goliath
   module TestHelper

@@ -56,10 +56,10 @@
 
 require 'pubs/api'
 require 'pubs/api/crud'
-
+require 'pubs/api/access_control'
 class Atoms < Pubs::API
   include Pubs::Api::CRUD
-  
+  use Pubs::Api::AccessControl    
   get "/#{plural_path}" do
     if model.element.i18n_attributes.empty?
       model.array_to_json filter(paginate(model.all)).to_sql
@@ -81,6 +81,8 @@ class Atoms < Pubs::API
        params["element"].classify.constantize
     elsif params["element_id"]   
       Element.find(params["element_id"]).class_name.constantize 
+    else
+      error! 404  
     end
   end
   

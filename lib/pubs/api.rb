@@ -1,9 +1,11 @@
 require 'goliath/websocket'
 require 'pubs/channels'
 require 'pubs/api/locale'
+require 'pubs/api/settings'
 module Pubs
 
   module Api
+    include Pubs::Api::Settings
   end
 
   class API < Goliath::WebSocket
